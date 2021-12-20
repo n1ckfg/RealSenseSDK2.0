@@ -117,7 +117,7 @@ public class RsStreamTextureRenderer : MonoBehaviour
     private bool Matches(Frame f)
     {
         using (var p = f.Profile)
-            return p.Stream == _stream && p.Format == _format && p.Index == _streamIndex;
+            return p.Stream == _stream && p.Format == _format && (p.Index == _streamIndex || _streamIndex == -1);
     }
 
     void OnNewSample(Frame frame)
@@ -180,7 +180,9 @@ public class RsStreamTextureRenderer : MonoBehaviour
             }
 
             using (var p = frame.Profile) {
-                texture = new Texture2D(frame.Width, frame.Height, Convert(p.Format), false, true)
+                bool linear = (QualitySettings.activeColorSpace != ColorSpace.Linear)
+                    || (p.Stream != Stream.Color && p.Stream != Stream.Infrared);
+                texture = new Texture2D(frame.Width, frame.Height, Convert(p.Format), false, linear)
                 {
                     wrapMode = TextureWrapMode.Clamp,
                     filterMode = filterMode
